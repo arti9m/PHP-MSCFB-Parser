@@ -1,5 +1,9 @@
 # PHP MSCFB Parser
-Microsoft Compound Binary File PHP Parser: a PHP class for parsing MS compound files (version 3 only).
+Microsoft Compound Binary File PHP Parser: a pure PHP class for parsing MS compound files (version 3 only).
+
+At least PHP 5.6 32-bit is required. Untested with PHP versions prior to 5.6.
+
+Works best with PHP 7.x 64-bit (more than two times faster than 5.6 32-bit)!
 
 [MS-CFB]: Compound File Binary File Format: 
 https://docs.microsoft.com/en-us/openspecs/windows_protocols/MS-CFB/53989ce4-7b05-4f8d-829b-d08d6148375b
