@@ -11,7 +11,7 @@ https://docs.microsoft.com/en-us/openspecs/windows_protocols/MS-CFB/53989ce4-7b0
 Some of the files related to Microsoft software are stored as a special file format called Compound File. This parser can be used to get information about streams and storages, and also to extract streams. Only Compound File version 3 is supported. Created for my XLS (Excel 95, 97-2003) parser to extract main Excel "Workbook" stream.
 
 Quick Start:
-1. Download MSCFB.PHP and put it to your PHP include directory, to your script directory or anywhere else.
+1. Download MSCFB.php and put it to your PHP include directory, to your script directory or anywhere else.
 2. Add the following line to the beginning of your PHP script (specify full path if needed):
 
 require_once "MSCFB.php";
