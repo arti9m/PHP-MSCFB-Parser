@@ -20,7 +20,7 @@ $file = new MSCFB("path_to_cfb_file.bin");
 
 var_dump($file->DE);
 
-5. Get stream ID by name:
+5. Get stream ID by name (\001CompObj provided as example. Since \001 is a special unprintable character, use double quotes to expand the character to actual data: "\001CompObj"):
 
 $id = $file->get_by_name("\001CompObj");
 
