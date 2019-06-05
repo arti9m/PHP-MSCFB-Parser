@@ -1,7 +1,7 @@
 # PHP MSCFB Parser
 Microsoft Compound Binary File PHP Parser: a pure PHP class for parsing MS compound files (version 3 only).
 
-Some of the files related to Microsoft software are stored as a special file format called Compound File. This parser can be used to get information about streams and storages, and also to extract streams. Only Compound File version 3 is supported. Created for my XLS (Excel 95, 97-2003) parser to extract main Excel "Workbook" stream.
+Some of the files related to Microsoft software are stored using a special file format called Compound File. This parser can be used to get information about streams and storages, and also to extract streams. Only Compound File version 3 is supported. Created for my XLS (Excel 95, 97-2003) parser to extract main Excel "Workbook" stream.
 
 ## Table of Contents
 1. [Requirements](#1-requirements)
