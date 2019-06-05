@@ -3,23 +3,16 @@ Microsoft Compound Binary File PHP Parser: a pure PHP class for parsing MS compo
 
 Some of the files related to Microsoft software are stored as a special file format called Compound File. This parser can be used to get information about streams and storages, and also to extract streams. Only Compound File version 3 is supported. Created for my XLS (Excel 95, 97-2003) parser to extract main Excel "Workbook" stream.
 
-[1. Requirements](#1-requirements)
-
-[2. Basic usage](#2-basic-usage)
-
-[3. More options](#3-more-options)
-
-[4. How it works](#4-how-it-works)
-
-[5. Public properties and methods](#5-public-properties-and-methods)
-
-[6. Error handling](#6-error-handling)
-
-[7. Security concerns](#7-security-concerns)
-
-[8. Performance and memory](#8-performance-and-memory)
-
-[9. More documentation](#9-more-documentation)
+## Table of Contents
+1. [Requirements](#1-requirements)
+2. [Basic usage](#2-basic-usage)
+3. [More options](#3-more-options)
+4. [How it works](#4-how-it-works)
+5. [Public properties and methods](#5-public-properties-and-methods)
+6. [Error handling](#6-error-handling)
+7. [Security concerns](#7-security-concerns)
+8. [Performance and memory](#8-performance-and-memory)
+9. [More documentation](#9-more-documentation)
 
 ## 1. Requirements
 
