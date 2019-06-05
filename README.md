@@ -6,13 +6,13 @@ Some of the files related to Microsoft software are stored as a special file for
 Microsoft Compound File Binary File Format documentation: 
 https://docs.microsoft.com/en-us/openspecs/windows_protocols/MS-CFB/53989ce4-7b05-4f8d-829b-d08d6148375b
 
-## Requirements
+## 1. Requirements
 
 At least PHP 5.6 32-bit is required. Untested with PHP versions prior to 5.6.
 
 Works best with PHP 7.x 64-bit (more than two times faster than 5.6 32-bit)!
 
-## Quick Start
+## 2. Quick Start
 1. Download __MSCFB.php__ and put it to your PHP include directory, or to your script directory, or anywhere else.
 2. Add the following line to the beginning of your PHP script (specify full path if needed):
 ```PHP
@@ -47,7 +47,7 @@ fclose($other_file); //other_file.bin now contains extracted stream binary data
 $file->free();
 unset($file);
 ```
-## More options
+## 3. More options
 
 ### Debug Mode
 
@@ -72,7 +72,7 @@ $file = new MSCFB("path_to_cfb_file.bin", false, 0); //temporary data always sto
 
 _Note:_ temporary files are automatically created and deleted by PHP.
 
-## How it works
+## 4. How it works
 
 1. File is opened for reading when MSCFB class is instantiated.
 2. File header is parsed and checked for errors (eg. whether it is actually a Compound File).
@@ -83,7 +83,7 @@ _Note:_ temporary files are automatically created and deleted by PHP.
 7. If neccessary, miniStream (storage for streams less than 4096 bytes) will be created and saved into a temporary stream resource.
 8. At this point, the user can extract any stream using `$this->extract_stream($stream_id, $ext_file = null)` function. If `$ext_file` is provided and it is a PHP stream resource, the specified Directory Entry will be read into it, otherwise the data will be returned as a string. `$stream_id` is the key of `$this->DE` array element, which corresponds to the Directroy Entry needed to be extracted. The user can obtain Directory Entry index by using `$this->get_by_name($name)` function, where `$name` is Directory Entry name.
 
-## Public properties and methods
+## 5. Public properties and methods
 
 ### Properties
 
@@ -112,7 +112,7 @@ $index = $this->get_by_name("\001CompObj");
 
 `(mixed) $this->extract_stream($stream_id, $ext_file = null)`: Extract Directory Entry (stream only!). `$stream_id` is a value returned by `$this->get_by_name()` or a valid stream index of `$this->DE`. If `$ext_file` is set and is a valid PHP stream resource, the data will be extracted to it, otherwise the data will be returned as a string. Will return `false` on error, `true` if a stream has been successfully written to external stream, or a _string_ with data is returned if no external stream supplied.
 
-## Error handling
+## 6. Error handling
 
 Each time an _error_ occures, the script places an error code into `$this->error` array and appends an error message to `this->err_msg`. If an error occures, it prevents execution of parts of the script that depend on successful execution of the part where the error occured. _Warnings_ work similarly to errors except they do not prevent execution of other parts of the script, because they always occur in non-critical places.
 
@@ -124,17 +124,17 @@ _Note:_ If an error occurs in `$this->extract_stream()`, it will return `false` 
 
 If Debug mode is enabled, all errors and warnings are printed (echoed) to standart output.
 
-## Security concerns
+## 7. Security concerns
 
 There are extensive error checks in every function that should prevent any potential problems no matter what file is supplied to the constructor. The only potential security risk can come from the Debug mode, which prints a function name in which an error or a warning has occured, but even then I do not see how such information can lead to problems with this particular class. It's pretty safe to say that this code can be safely run in (automated) production of any kind.
 
-## Performance and memory
+## 8. Performance and memory
 
 The MSCFB class has been optimized for fast parsing and data extraction, while still performing error checks for safety. It is possible to marginally increase constructor performance by leaving those error checks out, but I would strongly advise against it, because if a specially crafted mallicious file is supplied, it becomes possible to cause a memory hog or an infinite loop.
 
 Here are some numbers obtained on a Windows machine (Phenom II x4 940), using WAMP server:
 (coming soon)
 
-## More documentation
+## 9. More documentation
 
 All the code in MSCFB.php file is heavily commented, feel free to explore it! To understand how MS Compound File is structured, please refer to MS documentation linked above, or to OpenOffice.org's Documentation of MS Compound File (provided as a PDF file in this repository).
