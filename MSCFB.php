@@ -209,12 +209,6 @@ class MSCFB{
     $this->unpack_str = ''; //clear helper string
     return $ret; //return unpacked data
   }
-  
-  private function signed($power, &...$ints){ //function that converts ints to N-bit signed ints
-    foreach($ints as $key => $int){
-      if($int >= pow(2, ($power-1))) $ints[$key] -= pow(2, $power); 
-    }
-  }
 
 
   /* Get Stream entry by Name */
@@ -373,7 +367,10 @@ class MSCFB{
     }
     
     // convert values to 32-bit signed int
-    $this->signed(32,$u['sizeL'], $u['sector'], $u['left'], $u['right'], $u['child']);
+    if($u['sector']>0x7FFFFFFF) $u['sector'] -= 0x100000000;
+    if($u['left']>0x7FFFFFFF) $u['left'] -= 0x100000000;
+    if($u['right']>0x7FFFFFFF) $u['right'] -= 0x100000000;
+    if($u['child']>0x7FFFFFFF) $u['child'] -= 0x100000000;
     
     // size bounds check, generate warning on failure
     if($u['sizeL'] < 0 || $u['sizeL'] > $this->filesize-512*3){
@@ -532,8 +529,8 @@ class MSCFB{
     // $this->unpack_str = '';
     
     //convert numbers to 32-bit and 16-bit signed integers. Needed for 32/64 bit stuff.
-    $this->signed(32, $h['DIFAT_first'], $h['DIFAT_count'], $h['miniFAT_first'], $h['miniFAT_count'], $h['mini_cutoff'], $h['dir_first'], $h['FAT_count'], $h['DIR_count']);
-    $this->signed(16, $h['minor_ver'], $h['major_ver'], $h['byte_order'], $h['sector_shift'], $h['mini_shift']);
+    if($h['DIFAT_first']>0x7FFFFFFF) $h['DIFAT_first'] -= 0x100000000;
+    if($h['miniFAT_first']>0x7FFFFFFF) $h['miniFAT_first'] -= 0x100000000;
     
     if($h['signature']!=='d0cf11e0a1b11ae1'){
       $this->gen_err(self::E_H_SIGN, __FUNCTION__);
@@ -547,7 +544,7 @@ class MSCFB{
       $this->gen_err(self::E_H_VMAJ, __FUNCTION__);
       return false;
     }
-    if($h['byte_order']!==-2){
+    if($h['byte_order']!==0xFFFE){
       $this->gen_err(self::E_H_ORDER, __FUNCTION__);
       return false;
     }
@@ -596,7 +593,7 @@ class MSCFB{
       $this->gen_err(self::E_H_DIFATFIRST, __FUNCTION__);
       return false;
     }
-    if($h['DIFAT_count']>0x003FFFFD){ //this is not very realistic... :)
+    if($h['DIFAT_count']<0 || $h['DIFAT_count']>0x003FFFFD){ //this is not very realistic... :)
       $this->gen_err(self::E_H_DIFATCOUNT, __FUNCTION__);
       return false;
     }
@@ -621,7 +618,7 @@ class MSCFB{
     $difats = array(); //helper for duplicate checking
     
     foreach($difat_hdr as $value){
-      $this->signed(32,$value); //convert to 32-bit signed int
+      if($value > 0x7FFFFFFF) $value -= 0x100000000; //"convert" number to 32-bit signed
       if($value===-1) break; //-1 means no more DIFAT sectors
       
       //any sector location can be from 0 to 3FFFFE ("-1" is header)
@@ -674,7 +671,7 @@ class MSCFB{
         $difat_portion = unpack('V128', $bin_part); //unpack DIFAT addresses from this sector
         
         foreach($difat_portion as $key => $value){ //process entries
-          $this->signed(32,$value); //convert number to signed 32-bit integer
+          if($value > 0x7FFFFFFF) $value -= 0x100000000; //"convert" number to 32-bit signed
           
           if($value < -2 || $value > 0x3FFFFE){ //bounds check
             $this->gen_err(self::E_DIFATBOUNDS, __FUNCTION__, true);
@@ -741,7 +738,7 @@ class MSCFB{
       $FAT_part = unpack('V128', $bin); // unpack part of FAT
 
       foreach($FAT_part as $entry){
-        $this->signed(32,$entry); //convert to 32-bit signed int
+        if($entry > 0x7FFFFFFF) $entry -= 0x100000000; //"convert" number to 32-bit signed
         
         if($entry < -4 || $entry > 0x3FFFFE){ //-4: DIFAT, -3: FAT, -2: EndOfChain, -1: Free
           $this->gen_err(self::E_FATBOUNDS, __FUNCTION__);
@@ -821,7 +818,7 @@ class MSCFB{
       $FAT_part = unpack('V128', $bin); //unpack miniFAT sector numbers
       
       foreach($FAT_part as $entry){
-        $this->signed(32,$entry); //convert to 32-bit signed
+        if($entry > 0x7FFFFFFF) $entry -= 0x100000000; //"convert" number to 32-bit signed
         
         //check bounds
         if($entry < -2 || $entry > 0x1FFFFE8){ //3ffffe - 1(miniFAT) * 8(512/64=8)
@@ -1019,7 +1016,7 @@ class MSCFB{
   
   // Does some file-related error checking, reads file data and builds
   // neccessary structures (DIFAT, FAT, Directory Entries, miniStream)
-  function __construct($filename, $debug = false, $mem = 2097152){
+  function __construct($filename, $debug = false, $mem = 2097152){    
     $this->debug = (bool) $debug;
     $this->tmp_ram_size = $mem;
     
