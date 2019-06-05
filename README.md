@@ -4,7 +4,7 @@ Microsoft Compound Binary File PHP Parser: a pure PHP class for parsing MS compo
 Some of the files related to Microsoft software are stored as a special file format called Compound File. This parser can be used to get information about streams and storages, and also to extract streams. Only Compound File version 3 is supported. Created for my XLS (Excel 95, 97-2003) parser to extract main Excel "Workbook" stream.
 
 Microsoft Compound File Binary File Format documentation: 
-https://docs.microsoft.com/en-us/openspecs/windows_protocols/MS-CFB/53989ce4-7b05-4f8d-829b-d08d6148375b
+https://docs.microsoft.com/en-us/openspecs/windows_protocols/MS-CFB/
 
 ## 1. Requirements
 
@@ -132,9 +132,18 @@ There are extensive error checks in every function that should prevent any poten
 
 The MSCFB class has been optimized for fast parsing and data extraction, while still performing error checks for safety. It is possible to marginally increase constructor performance by leaving those error checks out, but I would strongly advise against it, because if a specially crafted mallicious file is supplied, it becomes possible to cause a memory hog or an infinite loop.
 
-Here are some numbers obtained on a Windows machine (Phenom II x4 940), using WAMP server:
-(coming soon)
+Here are some numbers obtained on a Windows machine (AMD Phenom II x4 940), with a 97.0MiB test XLS file (96.2MiB stream extracted) using WAMP server:
+
+```
+  Time   Memory     Time   Memory
+ 0.52s  27.6MiB |  0.37s  10.7MiB - Open file and parse its structure
+26.66s 128.6MiB |  5.41s 113.4MiB - Extract stream to string
+ 8.48s  27.6MiB |  4.19s  10.7MiB - Extract stream to file
+  5.6.25 32-bit |  7.0.10 64-bit  - PHP Version
+```
+
+Notice that extracting stream to temporary file is much faster in case of 5.6 version, and is much more memory efficient overall.
 
 ## 9. More documentation
 
-All the code in MSCFB.php file is heavily commented, feel free to explore it! To understand how MS Compound File is structured, please refer to MS documentation linked above, or to OpenOffice.org's Documentation of MS Compound File (provided as a PDF file in this repository).
+All the code in __MSCFB.php__ file is heavily commented, feel free to explore it! To understand how MS Compound File is structured, please refer to [MS documentation](https://docs.microsoft.com/en-us/openspecs/windows_protocols/MS-CFB/ "Open official Microsoft Compound Binary File Format documentation on Microsoft website") linked above, or to [OpenOffice.org's Documentation of MS Compound File](https://www.openoffice.org/sc/compdocfileformat.pdf "Open OpenOffice.org's Documentation of Microsoft Compound Binary File Format (PDF)") (also provided as a PDF file in this repository).
