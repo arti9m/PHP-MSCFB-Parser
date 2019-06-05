@@ -1,16 +1,18 @@
 # PHP MSCFB Parser
 Microsoft Compound Binary File PHP Parser: a pure PHP class for parsing MS compound files (version 3 only).
 
+Some of the files related to Microsoft software are stored as a special file format called Compound File. This parser can be used to get information about streams and storages, and also to extract streams. Only Compound File version 3 is supported. Created for my XLS (Excel 95, 97-2003) parser to extract main Excel "Workbook" stream.
+
+Microsoft Compound File Binary File Format documentation: 
+https://docs.microsoft.com/en-us/openspecs/windows_protocols/MS-CFB/53989ce4-7b05-4f8d-829b-d08d6148375b
+
+## Requirements
+
 At least PHP 5.6 32-bit is required. Untested with PHP versions prior to 5.6.
 
 Works best with PHP 7.x 64-bit (more than two times faster than 5.6 32-bit)!
 
-[MS-CFB]: Compound File Binary File Format: 
-https://docs.microsoft.com/en-us/openspecs/windows_protocols/MS-CFB/53989ce4-7b05-4f8d-829b-d08d6148375b
-
-Some of the files related to Microsoft software are stored as a special file format called Compound File. This parser can be used to get information about streams and storages, and also to extract streams. Only Compound File version 3 is supported. Created for my XLS (Excel 95, 97-2003) parser to extract main Excel "Workbook" stream.
-
-## Quick Start:
+## Quick Start
 1. Download __MSCFB.php__ and put it to your PHP include directory, or to your script directory, or anywhere else.
 2. Add the following line to the beginning of your PHP script (specify full path if needed):
 ```PHP
@@ -45,15 +47,19 @@ fclose($other_file); //other_file.bin now contains extracted stream binary data
 $file->free();
 unset($file);
 ```
-## Advanced
+## More options
+
 ### Debug Mode
-Debug mode enables output (echo) of all error and warning messages. To enable debug mode, set 2nd parameter to `true` in constructor:
+
+Debug mode enables output (echo) of all error and warning messages. To enable Debug mode, set 2nd parameter to `true` in constructor:
 ```PHP
 $file = new MSCFB("path_to_cfb_file.bin", true);
 ```
-**Warning!** PHP function name in which error occured is displayed alongside the actual message. Do not enable debug mode in your production code since it may pose a security risk!
+**Warning!** PHP function name in which error occured is displayed alongside the actual message. Do not enable Debug mode in your production code since it may pose a security risk!
+
 ### Limit memory for temporary files
-MSCFB may use temporary stream resource for storing some data (eg. miniStream) during its work. It is stored either in memory or as a temporary file, depending on data size. By default, data that exceeds 2MiB in size is stored in a temporary file.
+
+MSCFB may use temporary PHP stream resource for storing some data (eg. miniStream) during its work. It is stored either in memory or as a temporary file, depending on data size. By default, data that exceeds 2MiB in size is stored as a temporary file.
 
 You can control this threshold by specifying the size in bytes as the 3rd parameter to constructor:
 ```PHP
@@ -64,4 +70,71 @@ You can instruct PHP not to use a temporary file (thus always storing temporary 
 $file = new MSCFB("path_to_cfb_file.bin", false, 0); //temporary data always stored in memory
 ```
 
-Notice: temporary files are automatically created and deleted by PHP.
+_Note:_ temporary files are automatically created and deleted by PHP.
+
+## How it works
+
+1. File is opened for reading when MSCFB class is instantiated.
+2. File header is parsed and checked for errors (eg. whether it is actually a Compound File).
+3. First portion of DIFAT is read from header. (Please, refer to MS documentation linked above if you don't know what DIFAT, FAT and other terms mean).
+4. If needed, the rest of DIFAT is read from file. At this point `$this->DIFAT` array exists which represents DIFAT.
+5. FAT is read using DIFAT information. FAT is stored in `$this->FAT` array. When FAT is built, `$this->DIFAT` is deleted (assigned to empty array) since it's not needed anymore.
+6. Directory Entries are read and parsed using the information from header and FAT. At this point, `$this->DE` will be created and will have all neccessary information about every Directory Entry in the file: name, siblings, size, starting sector, etc.
+7. If neccessary, miniStream (storage for streams less than 4096 bytes) will be created and saved into a temporary stream resource.
+8. At this point, the user can extract any stream using `$this->extract_stream($stream_id, $ext_file = null)` function. If `$ext_file` is provided and it is a PHP stream resource, the specified Directory Entry will be read into it, otherwise the data will be returned as a string. `$stream_id` is the key of `$this->DE` array element, which corresponds to the Directroy Entry needed to be extracted. The user can obtain Directory Entry index by using `$this->get_by_name($name)` function, where `$name` is Directory Entry name.
+
+## Public properties and methods
+
+### Properties
+
+`(boolean) $this->debug`: whether or not to display error and warning messages;
+
+`(string) $this->err_msg`: a string that contains all error messages concatenated into one;
+
+`(string) $this->warn_msg`: same as above, but for warnings;
+
+`(array) $this->error`: array of error codes, empty if no errors occured;
+
+`(array) $this->warn`: array of warning codes, empty if no warnings occured;
+
+`(array) $this->DE`: array of Directory Entries. You should never modify it manually! It's provided as a public property only because of potential memory and speed concerns.
+
+`(string) $this->DE_enc`: encoding for mb_convert_encoding, which is automatically set to the return value of `mb_internal_encoding()` in constructor. It is used to convert Directory Entries names to active or default PHP encoding from UTF-16LE. Conversion is done using `mb_convert_encoding()` function.
+
+### Methods (functions)
+
+`(int) $this->get_by_name($name, $is16 = false)`: returns ID of Directory Entry that can be used for stream extracting, or -1, if specified Directory Entry is not found. `$name` is the Directory Entry name without null termination character. If `$is16` evaluates to `true`, `$name` must be a complete _UTF-16LE_ name of the Directory Entry without null termination character.
+
+_Note:_ If you have a Directory Entry name like `\001CompObj`, where `\001` is the character with the value `0x01`, not the string literal `\001`, you should provide it in double quotes so `\001` is expanded to the correct value, like so:
+```PHP
+$index = $this->get_by_name("\001CompObj");
+```
+
+`(mixed) $this->extract_stream($stream_id, $ext_file = null)`: Extract Directory Entry (stream only!). `$stream_id` is a value returned by `$this->get_by_name()` or a valid stream index of `$this->DE`. If `$ext_file` is set and is a valid PHP stream resource, the data will be extracted to it, otherwise the data will be returned as a string. Will return `false` on error, `true` if a stream has been successfully written to external stream, or a _string_ with data is returned if no external stream supplied.
+
+## Error handling
+
+Each time an _error_ occures, the script places an error code into `$this->error` array and appends an error message to `this->err_msg`. If an error occures, it prevents execution of parts of the script that depend on successful execution of the part where the error occured. _Warnings_ work similarly to errors except they do not prevent execution of other parts of the script, because they always occur in non-critical places.
+
+If an error occurs in constructor and Debug mode is disabled, the user should check if `$this->error` evaluates to `true`, in which case the error text can be read from `$this->err_msg` and the error code can be obtained from `$this->error` array.
+
+_Note:_ `$this->get_by_name()` will return `-1` if the specified entry name is not found, but it will __not__ emit an error or a warning.
+
+_Note:_ If an error occurs in `$this->extract_stream()`, it will return `false` and emit an error.
+
+If Debug mode is enabled, all errors and warnings are printed (echoed) to standart output.
+
+## Security concerns
+
+There are extensive error checks in every function that should prevent any potential problems no matter what file is supplied to the constructor. The only potential security risk can come from the Debug mode, which prints a function name in which an error or a warning has occured, but even then I do not see how such information can lead to problems with this particular class. It's pretty safe to say that this code can be safely run in (automated) production of any kind.
+
+## Performance and memory
+
+The MSCFB class has been optimized for fast parsing and data extraction, while still performing error checks for safety. It is possible to marginally increase constructor performance by leaving those error checks out, but I would strongly advise against it, because if a specially crafted mallicious file is supplied, it becomes possible to cause a memory hog or an infinite loop.
+
+Here are some numbers obtained on a Windows machine (Phenom II x4 940), using WAMP server:
+(coming soon)
+
+## More documentation
+
+All the code in MSCFB.php file is heavily commented, feel free to explore it! To understand how MS Compound File is structured, please refer to MS documentation linked above, or to OpenOffice.org's Documentation of MS Compound File (provided as a PDF file in this repository).
