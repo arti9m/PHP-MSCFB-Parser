@@ -103,7 +103,7 @@ _Note:_ temporary files are automatically created and deleted by PHP.
 
 ### Methods (functions)
 
-`(int) $this->get_by_name($name, $is16 = false)`: returns ID of Directory Entry that can be used for stream extracting, or -1, if specified Directory Entry is not found. `$name` is the Directory Entry name without null termination character. If `$is16` evaluates to `true`, `$name` must be a complete _UTF-16LE_ name of the Directory Entry without null termination character.
+`(int) $this->get_by_name($name, $is16 = false)`: returns ID of Directory Entry that can be used for stream extracting, or `-1`, if specified Directory Entry is not found. `$name` is the Directory Entry name without null termination character. If `$is16` evaluates to `true`, `$name` must be a complete _UTF-16LE_ name of the Directory Entry without null termination character.
 
 _Note:_ If you have a Directory Entry name like `\001CompObj`, where `\001` is the character with the value `0x01`, not the string literal `\001`, you should provide it in double quotes so `\001` is expanded to the correct value, like so:
 ```PHP
