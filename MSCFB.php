@@ -407,7 +407,7 @@ class MSCFB{
     }
     $sectorN = $this->DE_first; // sector number with first portion of DE
     
-    $dir_count = 0; // helper for error checking
+    $dir_index = 0; // helper for error checking, also index of current DE
     $this->DE_count = 0; // reset DE count
     $this->DE = array(); // initialize DE storage
 
@@ -422,9 +422,8 @@ class MSCFB{
       
       //There are max 4 dir entries per sector (dir size is 128B, sector is 512B)
       for($i=0; $i<4; $i++){
-        ++$dir_count; //for error checking
        
-        if($dir_count>0xFFFFF8){ //dir count out of bounds
+        if($dir_index>0xFFFFF8){ //dir count out of bounds
           $this->gen_err(self::E_DIRCNTBOUNDS, __FUNCTION__);
           return false;
         }
@@ -436,7 +435,7 @@ class MSCFB{
         }
         
         if($t = $this->process_dir_entry($dir_bin)){
-          if($dir_count===1){ //this is the very first entry, must be Root!
+          if($dir_index===0){ //this is the very first entry, must be Root!
             // If not Root Entry, file is not valid!
             if($t['type']!==5||$t['name']!=='Root Entry'){
               $this->gen_err(self::E_DE_NOROOT, __FUNCTION__);
@@ -447,7 +446,8 @@ class MSCFB{
             $this->MSTREAM_first = $t['sector'];
             $this->MSTREAM_size = $t['sizeL'];
           }
-          $this->DE[] = $t; // add current entry to $this->DE storage
+          $this->DE[$dir_index] = $t; // add current entry to $this->DE storage
+          ++$dir_index;
           ++$this->DE_count; // Directory Entries counter
         }
       }
