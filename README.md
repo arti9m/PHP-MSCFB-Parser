@@ -150,7 +150,7 @@ Here are some numbers obtained on a Windows machine (AMD Phenom II x4 940), with
   5.6.25 32-bit |  7.0.10 64-bit  - PHP Version
 ```
 
-Notice that extracting stream to temporary file is much faster in case of 5.6 version, and is much more memory efficient overall.
+Notice that extracting stream to a temporary file is much faster than extracting to string in PHP 5.6, and is much more memory efficient overall.
 
 ## 9. More documentation
 
