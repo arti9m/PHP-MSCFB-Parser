@@ -24,11 +24,11 @@ Works best with PHP 7.x 64-bit (more than two times faster than 5.6 32-bit)!
 1. Download __MSCFB.php__ and put it to your PHP include directory, or to your script directory, or anywhere else.
 2. Add the following line to the beginning of your PHP script (specify full path if needed):
 ```PHP
-require_once "MSCFB.php";
+require_once 'MSCFB.php';
 ```
 3. Create instance of our class (open Compound File): 
 ```PHP
-$file = new MSCFB("path_to_cfb_file.bin");
+$file = new MSCFB('path_to_cfb_file.bin');
 ```
 4. (Optional) Print information about storages and streams (Directory Entries):
 ```PHP
