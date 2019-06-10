@@ -118,7 +118,7 @@ class MSCFB{
   /* PROPERTIES */
 
   public $debug = false; // wether or not errors and warnings are echoed
-  
+
   // file related
   private $filesize = 0;
   private $file = null; // file stream will be stored here as PHP stream resource
