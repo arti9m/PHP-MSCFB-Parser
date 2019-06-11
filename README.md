@@ -10,7 +10,7 @@ Some of the files related to Microsoft software are stored using a special file 
 4. [How it works](#4-how-it-works)
 5. [Public properties and methods](#5-public-properties-and-methods)
 6. [Error handling](#6-error-handling)
-7. [Security concerns](#7-security-concerns)
+7. [Security considerations](#7-security-considerations)
 8. [Performance and memory](#8-performance-and-memory)
 9. [More documentation](#9-more-documentation)
 
@@ -65,9 +65,9 @@ $file = new MSCFB("path_to_cfb_file.bin", true);
 ```
 **Warning!** PHP function name in which error occured is displayed alongside the actual message. Do not enable Debug mode in your production code since it may pose a security risk!
 
-### Limit memory for temporary files
+### Temporary files and memory
 
-MSCFB may use temporary PHP stream resource for storing some data (eg. miniStream) during its work. It is stored either in memory or as a temporary file, depending on data size. By default, data that exceeds 2MiB in size is stored as a temporary file.
+MSCFB may need to use temporary PHP stream resource for storing some data (eg. miniStream) during its work. It is stored either in memory or as a temporary file, depending on data size. By default, data that exceeds 2MiB (PHP's default value) in size is stored as a temporary file.
 
 You can control this threshold by specifying the size in bytes as the 3rd parameter to constructor:
 ```PHP
@@ -76,6 +76,10 @@ $file = new MSCFB("path_to_cfb_file.bin", false, 1024); //data with size > 1KiB 
 You can instruct PHP not to use a temporary file (thus always storing temporary data in memory) by setting the argument to zero:
 ```PHP
 $file = new MSCFB("path_to_cfb_file.bin", false, 0); //temporary data always stored in memory
+```
+Set this parameter to `null` to use default value:
+```PHP
+$file = new MSCFB("path_to_cfb_file.bin", false, null); //default temp file settings
 ```
 
 _Note:_ temporary files are automatically created and deleted by PHP.
@@ -111,6 +115,8 @@ _Note:_ temporary files are automatically created and deleted by PHP.
 
 ### Methods (functions)
 
+`constructor($filename, $debug = false, $mem = null)`: creates an instance of MSCFB class. `$filename` is path to your Compound File, `$debug` enables or disables [Debug mode](#debug-mode), `$mem` controls when a [temporary file is used instead of memory](#temporary-files-and-memory).
+
 `(int) $this->get_by_name($name, $is16 = false)`: returns ID of Directory Entry that can be used for stream extracting, or `-1`, if specified Directory Entry is not found. `$name` is the Directory Entry name without null termination character. If `$is16` evaluates to `true`, `$name` must be a complete _UTF-16LE_ name of the Directory Entry without null termination character.
 
 _Note:_ If you have a Directory Entry name like `\001CompObj`, where `\001` is the character with the value `0x01`, not the string literal `\001`, you should provide it in double quotes so `\001` is expanded to the correct value, like so:
@@ -122,9 +128,9 @@ $index = $this->get_by_name("\001CompObj");
 
 ## 6. Error handling
 
-Each time an _error_ occures, the script places an error code into `$this->error` array and appends an error message to `this->err_msg`. If an error occures, it prevents execution of parts of the script that depend on successful execution of the part where the error occured. _Warnings_ work similarly to errors except they do not prevent execution of other parts of the script, because they always occur in non-critical places.
+Each time an _error_ occures, the script places an error code into `$this->error` array and appends an error message to `this->err_msg`. If an error occures, it prevents execution of parts of the script that depend on successful execution of the part where the error occured. _Warnings_ work similarly to errors except they do not prevent execution of other parts of the script, because they always occur in non-critical places. Warnings use `$this->warn` to store warning codes and `$this->warn_msg` for warning texts.
 
-If an error occurs in constructor and Debug mode is disabled, the user should check if `$this->error` evaluates to `true`, in which case the error text can be read from `$this->err_msg` and the error code can be obtained from `$this->error` array.
+If an error occurs in constructor and Debug mode is disabled, the user should check if `$this->error` evaluates to `true`, in which case the error text can be read from `$this->err_msg` and the error code can be obtained from `$this->error` array. Same applies to _Warnings_.
 
 _Note:_ `$this->get_by_name()` will return `-1` if the specified entry name is not found, but it will __not__ emit an error or a warning.
 
@@ -132,7 +138,7 @@ _Note:_ If an error occurs in `$this->extract_stream()`, it will return `false` 
 
 If Debug mode is enabled, all errors and warnings are printed (echoed) to standart output.
 
-## 7. Security concerns
+## 7. Security considerations
 
 There are extensive error checks in every function that should prevent any potential problems no matter what file is supplied to the constructor. The only potential security risk can come from the Debug mode, which prints a function name in which an error or a warning has occured, but even then I do not see how such information can lead to problems with this particular class. It's pretty safe to say that this code can be safely run in (automated) production of any kind.
 
