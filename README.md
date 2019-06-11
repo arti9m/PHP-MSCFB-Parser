@@ -130,7 +130,7 @@ $index = $this->get_by_name("\001CompObj");
 
 Each time an _error_ occures, the script places an error code into `$this->error` array and appends an error message to `this->err_msg`. If an error occures, it prevents execution of parts of the script that depend on successful execution of the part where the error occured. _Warnings_ work similarly to errors except they do not prevent execution of other parts of the script, because they always occur in non-critical places. Warnings use `$this->warn` to store warning codes and `$this->warn_msg` for warning texts.
 
-If an error occurs in constructor and Debug mode is disabled, the user should check if `$this->error` evaluates to `true`, in which case the error text can be read from `$this->err_msg` and the error code can be obtained from `$this->error` array. Same applies to _Warnings_ (which use `$this->warn_msg` and `$this->warn`, respectively).
+If an error occurs in constructor and Debug mode is disabled, the user should check if `$this->error` evaluates to `true`, in which case the error text can be read from `$this->err_msg` and the error code can be obtained from `$this->error` array. Same applies to Warnings, which use `$this->warn_msg` and `$this->warn`, respectively.
 
 _Note:_ `$this->get_by_name()` will return `-1` if the specified entry name is not found, but it will __not__ emit an error or a warning.
 
