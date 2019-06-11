@@ -858,10 +858,13 @@ class MSCFB{
     }
 
 
-
+    
     $temp_str = 'php://temp'; //temp file address for fopen()
-    $size = (int) $this->tmp_ram_size;
-    if($size>0) $temp_str .= '/maxmemory:'.$size; //tempfile size adjustment
+    if($this->tmp_ram_size !== null){ //if tmp size was manually set
+      $size = (int) $this->tmp_ram_size;
+      if($size>0) $temp_str .= '/maxmemory:'.$size; //tempfile size adjustment
+      if($size===0) $temp_str = 'php://memory'; //always store data in memory
+    }
 
     //create temporary stream
     if(false === ($this->MSTREAM = fopen($temp_str, 'w+b'))){
@@ -1018,7 +1021,7 @@ class MSCFB{
 
   // Does some file-related error checking, reads file data and builds
   // neccessary structures (DIFAT, FAT, Directory Entries, miniStream)
-  function __construct($filename, $debug = false, $mem = 2097152){
+  function __construct($filename, $debug = false, $mem = null){
     $this->debug = (bool) $debug;
     $this->tmp_ram_size = $mem;
 
