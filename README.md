@@ -154,7 +154,7 @@ Here are some numbers obtained on a Windows machine (AMD Phenom II x4 940), with
  |0.52s|  27.6 MiB |  0.37s | 10.7 MiB | Open file and parse its structure
 |26.66s| 128.6 MiB |  5.41s |113.4 MiB |Extract stream to string
 | 8.48s|  27.6 MiB |  4.19s  |10.7 MiB | Extract stream to file
- | __5.6.25 32-bit__ |  __7.0.10 64-bit__ | __5.6.25 32-bit__ |  __7.0.10 64-bit__ | __PHP Version__
+ | __5.6.25 32-bit__ |  __5.6.25 32-bit__ | __7.0.10 64-bit__ |  __7.0.10 64-bit__ | __PHP Version__
 
 
 Notice that extracting stream to a temporary file is much faster than extracting to string in PHP 5.6, and is much more memory efficient overall.
